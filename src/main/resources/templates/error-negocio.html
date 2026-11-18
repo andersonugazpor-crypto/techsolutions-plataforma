@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Aviso')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar('')}"></aside>
+    <main class="contenido">
+        <div class="tarjeta">
+            <h1 th:text="${titulo}">Aviso</h1>
+            <p th:text="${mensaje}">Mensaje</p>
+            <a class="btn" th:href="@{/}">Ir al inicio</a>
+        </div>
+    </main>
+</div>
+</body>
+</html>

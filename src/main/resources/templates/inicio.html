@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Inicio')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar('inicio')}"></aside>
+    <main class="contenido">
+        <header class="cabecera">
+            <div>
+                <h1 th:text="'Hola, ' + ${usuario.nombreCompleto()}">Hola</h1>
+                <p>Resumen de ventas, inventario y pagos de tu negocio.</p>
+            </div>
+            <a class="btn" th:href="@{/pedidos/nuevo}">+ Nuevo pedido</a>
+        </header>
+        <div th:replace="~{fragments/layout :: mensajes}"></div>
+
+        <div class="grilla g4">
+            <a class="kpi" th:href="@{/pedidos}">
+                <div class="etiqueta">Pedidos pendientes</div>
+                <div class="valor" th:text="${pedidosPendientes}">0</div>
+            </a>
+            <a class="kpi" th:href="@{/pedidos}">
+                <div class="etiqueta">Pedidos procesados</div>
+                <div class="valor" th:text="${pedidosProcesados}">0</div>
+            </a>
+            <a class="kpi" th:classappend="${productosBajoMinimo > 0} ? 'alerta-kpi'" th:href="@{/inventario(soloBajo=true)}">
+                <div class="etiqueta">Productos bajo stock mínimo</div>
+                <div class="valor" th:text="${productosBajoMinimo}">0</div>
+            </a>
+            <a class="kpi" th:href="@{/notificaciones}">
+                <div class="etiqueta">Notificaciones sin leer</div>
+                <div class="valor" th:text="${notificacionesPendientes}">0</div>
+            </a>
+        </div>
+        <br>
+        <div class="grilla g3">
+            <div class="tarjeta">
+                <h2>Estrategia de precios</h2>
+                <div class="badge info" th:text="${estrategia.nombre()}">Estándar</div>
+                <p class="suave" th:text="${estrategia.descripcion()}"></p>
+            </div>
+            <div class="tarjeta">
+                <h2>Pasarelas habilitadas</h2>
+                <div class="acciones-linea">
+                    <span class="badge ok" th:each="p : ${pasarelas}" th:text="${p.nombre()}">Yape</span>
+                    <span class="suave" th:if="${#lists.isEmpty(pasarelas)}">Ninguna pasarela habilitada</span>
+                </div>
+            </div>
+            <div class="tarjeta">
+                <h2>Cola de comandos</h2>
+                <p><strong th:text="${comandosEnCola}">0</strong> comando(s) esperando ejecución.</p>
+                <a th:href="@{/pedidos/cola}">Ver cola →</a>
+            </div>
+        </div>
+
+        <div class="tarjeta">
+            <h2>Actividad reciente</h2>
+            <table>
+                <thead><tr><th>Fecha</th><th>Acción</th><th>Detalle</th><th>Usuario</th><th>Resultado</th></tr></thead>
+                <tbody>
+                <tr th:each="r : ${actividad}">
+                    <td th:text="${#temporals.format(r.fecha, 'dd/MM HH:mm:ss')}"></td>
+                    <td><span class="badge" th:text="${r.comando}"></span></td>
+                    <td>
+                        <a th:if="${r.pedidoId != null}" th:href="@{/pedidos/{id}(id=${r.pedidoId})}" th:text="${r.descripcion}"></a>
+                        <span th:if="${r.pedidoId == null}" th:text="${r.descripcion}"></span>
+                    </td>
+                    <td th:text="${r.usuario}"></td>
+                    <td><span class="badge" th:classappend="${r.exitoso} ? 'ok' : 'mal'" th:text="${r.exitoso} ? 'OK' : 'Falló'"></span></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(actividad)}"><td colspan="5" class="suave">Sin actividad todavía.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+</body>
+</html>

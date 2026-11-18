@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(titulo)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${titulo} + ' · TechSolutions'">TechSolutions</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+
+<aside th:fragment="sidebar(activo)" class="sidebar">
+    <div class="marca">
+        <span class="logo">TS</span>
+        <div><strong>TechSolutions</strong><small>Gestión para pymes</small></div>
+    </div>
+    <nav>
+        <a th:href="@{/}" th:classappend="${activo == 'inicio'} ? 'activo'">Inicio</a>
+        <span class="seccion">Ventas</span>
+        <a th:href="@{/catalogo}" th:classappend="${activo == 'catalogo'} ? 'activo'">Catálogo</a>
+        <a th:href="@{/pedidos}" th:classappend="${activo == 'pedidos'} ? 'activo'">Pedidos</a>
+        <a th:href="@{/pedidos/cola}" th:classappend="${activo == 'cola'} ? 'activo'">Cola de comandos</a>
+        <span class="seccion">Operaciones</span>
+        <a th:href="@{/inventario}" th:classappend="${activo == 'inventario'} ? 'activo'">Inventario</a>
+        <a th:href="@{/notificaciones}" th:classappend="${activo == 'notificaciones'} ? 'activo'">
+            <span>Notificaciones</span>
+            <span class="burbuja" th:if="${notificacionesPendientes != null and notificacionesPendientes > 0}"
+                  th:text="${notificacionesPendientes}">3</span>
+        </a>
+        <a th:href="@{/reportes}" th:classappend="${activo == 'reportes'} ? 'activo'">Reportes financieros</a>
+        <th:block th:if="${usuario != null and usuario.esAdministrador()}">
+            <span class="seccion">Administración</span>
+            <a th:href="@{/admin/configuracion}" th:classappend="${activo == 'admin'} ? 'activo'">Configuración</a>
+        </th:block>
+    </nav>
+    <div class="usuario-box" th:if="${usuario != null}">
+        <div class="nombre" th:text="${usuario.nombreCompleto()}">Usuario</div>
+        <span class="badge info" th:text="${usuario.rol().etiqueta}">Rol</span><br>
+        <a th:href="@{/logout}">Cerrar sesión</a>
+    </div>
+</aside>
+
+<div th:fragment="mensajes">
+    <div class="alerta exito" th:if="${exito != null}" th:text="${exito}">Éxito</div>
+    <div class="alerta error" th:if="${error != null}" th:text="${error}">Error</div>
+</div>
+
+</body>
+</html>

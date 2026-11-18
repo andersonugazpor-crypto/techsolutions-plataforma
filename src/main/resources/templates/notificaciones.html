@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Notificaciones')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar('notificaciones')}"></aside>
+    <main class="contenido">
+        <header class="cabecera">
+            <div>
+                <h1>Notificaciones</h1>
+                <p>Alertas automáticas de stock bajo enviadas a tu rol.</p>
+            </div>
+            <form method="post" th:action="@{/notificaciones/leer-todas}" th:if="${notificacionesPendientes > 0}">
+                <button class="btn secundario" type="submit">Marcar todas como leídas</button>
+            </form>
+        </header>
+        <div th:replace="~{fragments/layout :: mensajes}"></div>
+        <div class="tarjeta">
+            <ul class="lista-limpia">
+                <li th:each="n : ${notificaciones}" class="notificacion" th:classappend="${!n.leida} ? 'no-leida'">
+                    <div>
+                        <strong th:text="${n.titulo}"></strong>
+                        <span class="badge info" th:text="${n.rolDestino.etiqueta}"></span><br>
+                        <span th:text="${n.mensaje}"></span><br>
+                        <small th:text="${#temporals.format(n.fecha, 'dd/MM/yyyy HH:mm:ss')}"></small>
+                    </div>
+                    <form th:unless="${n.leida}" method="post" th:action="@{/notificaciones/{id}/leer(id=${n.id})}">
+                        <button class="btn secundario pequeno" type="submit">Marcar leída</button>
+                    </form>
+                    <span th:if="${n.leida}" class="badge">Leída</span>
+                </li>
+                <li th:if="${#lists.isEmpty(notificaciones)}" class="suave">No tienes notificaciones.</li>
+            </ul>
+        </div>
+    </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Catálogo')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar('catalogo')}"></aside>
+    <main class="contenido">
+        <header class="cabecera">
+            <div>
+                <h1>Catálogo de productos</h1>
+                <p>Precios calculados con la estrategia <strong th:text="${estrategia.nombre()}">Estándar</strong>.</p>
+            </div>
+        </header>
+        <div th:replace="~{fragments/layout :: mensajes}"></div>
+
+        <form class="tarjeta filtros" th:action="@{/catalogo}" method="get">
+            <div class="campo">
+                <label for="texto">Buscar</label>
+                <input type="text" id="texto" name="texto" th:value="${filtro.texto()}" placeholder="Nombre o código">
+            </div>
+            <div class="campo">
+                <label for="categoria">Categoría</label>
+                <select id="categoria" name="categoria">
+                    <option value="">Todas</option>
+                    <option th:each="c : ${categorias}" th:value="${c}" th:text="${c}" th:selected="${c == filtro.categoria()}"></option>
+                </select>
+            </div>
+            <div class="campo">
+                <label for="tamano">Por página</label>
+                <select id="tamano" name="tamano">
+                    <option th:each="t : ${tamanos}" th:value="${t}" th:text="${t}" th:selected="${t == pagina.tamano}"></option>
+                </select>
+            </div>
+            <label class="check"><input type="checkbox" name="soloBajo" value="true" th:checked="${filtro.soloStockBajo()}"> Solo stock bajo</label>
+            <button class="btn" type="submit">Buscar</button>
+            <a class="btn secundario" th:href="@{/catalogo}">Limpiar</a>
+        </form>
+
+        <div class="alerta info" th:if="${pagina.totalElementos == 0}">No se encontraron productos con esos filtros.</div>
+
+        <div class="productos">
+            <div class="producto" th:each="p : ${pagina.elementos}">
+                <span class="codigo" th:text="${p.codigo}">ABR-001</span>
+                <span class="nombre" th:text="${p.nombre}">Producto</span>
+                <span><span class="badge" th:text="${p.categoria}">Categoría</span></span>
+                <span class="precio">
+                    S/ <span th:text="${#numbers.formatDecimal(p.precioFinal, 1, 'COMMA', 2, 'POINT')}">0.00</span>
+                    <s th:if="${p.precioModificado}" th:text="'S/ ' + ${#numbers.formatDecimal(p.precioBase, 1, 'COMMA', 2, 'POINT')}"></s>
+                </span>
+                <span>
+                    <span class="badge" th:classappend="${p.bajoMinimo} ? 'mal' : 'ok'"
+                          th:text="${p.bajoMinimo} ? 'Stock bajo: ' + ${p.stock} : 'Stock: ' + ${p.stock}">Stock</span>
+                </span>
+            </div>
+        </div>
+
+        <div class="paginacion">
+            <span class="suave" th:text="'Mostrando ' + ${pagina.desde} + '–' + ${pagina.hasta} + ' de ' + ${pagina.totalElementos} + ' productos'"></span>
+            <div class="acciones-linea">
+                <a class="btn secundario pequeno" th:if="${pagina.tieneAnterior}"
+                   th:href="@{/catalogo(texto=${filtro.texto()},categoria=${filtro.categoria()},soloBajo=${filtro.soloStockBajo()},tamano=${pagina.tamano},pagina=${pagina.pagina - 1})}">← Anterior</a>
+                <span th:text="'Página ' + ${pagina.numeroVisible} + ' de ' + ${pagina.totalPaginas}"></span>
+                <a class="btn secundario pequeno" th:if="${pagina.tieneSiguiente}"
+                   th:href="@{/catalogo(texto=${filtro.texto()},categoria=${filtro.categoria()},soloBajo=${filtro.soloStockBajo()},tamano=${pagina.tamano},pagina=${pagina.pagina + 1})}">Siguiente →</a>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

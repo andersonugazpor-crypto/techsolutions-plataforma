@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Pedido')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar('pedidos')}"></aside>
+    <main class="contenido">
+        <header class="cabecera">
+            <div>
+                <h1>
+                    <span th:text="'Pedido #' + ${pedido.id}">Pedido</span>
+                    <span class="badge" th:classappend="${pedido.estado.claseCss}" th:text="${pedido.estado.etiqueta}"></span>
+                </h1>
+                <p th:text="${pedido.cliente} + ' · creado el ' + ${#temporals.format(pedido.fechaCreacion, 'dd/MM/yyyy HH:mm')}"></p>
+            </div>
+            <a class="btn secundario" th:href="@{/pedidos}">← Volver a pedidos</a>
+        </header>
+        <div th:replace="~{fragments/layout :: mensajes}"></div>
+
+        <div class="grilla g2">
+            <div class="tarjeta">
+                <h2>Detalle</h2>
+                <table>
+                    <thead><tr><th>Producto</th><th class="num">Cant.</th><th class="num">P. unit.</th><th class="num">Subtotal</th></tr></thead>
+                    <tbody>
+                    <tr th:each="i : ${pedido.items}">
+                        <td th:text="${i.producto.nombre}"></td>
+                        <td class="num" th:text="${i.cantidad}"></td>
+                        <td class="num" th:text="${#numbers.formatDecimal(i.precioUnitario, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td class="num" th:text="${#numbers.formatDecimal(i.subtotal, 1, 'COMMA', 2, 'POINT')}"></td>
+                    </tr>
+                    <tr><td colspan="3" class="num">Subtotal</td><td class="num" th:text="${#numbers.formatDecimal(pedido.subtotal, 1, 'COMMA', 2, 'POINT')}"></td></tr>
+                    <tr><td colspan="3" class="num" th:text="'Descuento (' + ${pedido.porcentajeDescuento.stripTrailingZeros().toPlainString()} + '%)'"></td>
+                        <td class="num" th:text="'− ' + ${#numbers.formatDecimal(pedido.montoDescuento, 1, 'COMMA', 2, 'POINT')}"></td></tr>
+                    <tr><td colspan="3" class="num"><strong>Total</strong></td>
+                        <td class="num"><strong th:text="'S/ ' + ${#numbers.formatDecimal(pedido.total, 1, 'COMMA', 2, 'POINT')}"></strong></td></tr>
+                    </tbody>
+                </table>
+                <br>
+                <table>
+                    <tr><td class="suave">Pasarela</td><td th:text="${nombrePasarela}"></td></tr>
+                    <tr><td class="suave">Contacto de pago</td><td th:text="${pedido.contactoPago}"></td></tr>
+                    <tr><td class="suave">Código de transacción</td><td th:text="${pedido.codigoTransaccion != null} ? ${pedido.codigoTransaccion} : '—'"></td></tr>
+                </table>
+            </div>
+
+            <div>
+                <div class="tarjeta" th:if="${puedeGestionar}">
+                    <h2>Acciones</h2>
+                    <p class="suave">“Ejecutar” aplica el comando ahora. “Encolar” lo deja en la cola para procesarlo después en orden.</p>
+                    <div class="campo">
+                        <label>Procesar: cobrar con la pasarela y descontar stock</label>
+                        <form class="acciones-linea" method="post" th:action="@{/pedidos/{id}/procesar(id=${pedido.id})}">
+                            <button class="btn exito" name="modo" value="ejecutar" th:disabled="${!pedido.comportamiento().puedeProcesar()}">Procesar</button>
+                            <button class="btn secundario" name="modo" value="encolar" th:disabled="${!pedido.comportamiento().puedeProcesar()}">Encolar</button>
+                        </form>
+                    </div>
+                    <div class="campo">
+                        <label for="porcentaje">Aplicar descuento (%)</label>
+                        <form class="acciones-linea" method="post" th:action="@{/pedidos/{id}/descuento(id=${pedido.id})}">
+                            <input type="number" id="porcentaje" name="porcentaje" min="0.5" max="50" step="0.5" value="5" class="mini" required
+                                   th:disabled="${!pedido.comportamiento().puedeAplicarDescuento()}">
+                            <button class="btn" name="modo" value="ejecutar" th:disabled="${!pedido.comportamiento().puedeAplicarDescuento()}">Aplicar</button>
+                            <button class="btn secundario" name="modo" value="encolar" th:disabled="${!pedido.comportamiento().puedeAplicarDescuento()}">Encolar</button>
+                        </form>
+                    </div>
+                    <div class="campo">
+                        <label>Cancelar pedido (si estaba procesado, el stock se devuelve)</label>
+                        <form class="acciones-linea" method="post" th:action="@{/pedidos/{id}/cancelar(id=${pedido.id})}"
+                              onsubmit="return confirm('¿Cancelar este pedido? Podrás revertirlo desde los puntos de restauración.');">
+                            <button class="btn peligro" name="modo" value="ejecutar" th:disabled="${!pedido.comportamiento().puedeCancelar()}">Cancelar pedido</button>
+                            <button class="btn secundario" name="modo" value="encolar" th:disabled="${!pedido.comportamiento().puedeCancelar()}">Encolar</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="tarjeta">
+                    <h2>Puntos de restauración (deshacer)</h2>
+                    <p class="suave">Antes de cada cambio se guarda una instantánea del pedido. Restaurar vuelve el pedido a ese estado y ajusta el stock.</p>
+                    <ul class="lista-limpia">
+                        <li th:each="m, st : ${mementos}" class="notificacion">
+                            <div>
+                                <strong th:text="${st.count} + '. ' + ${m.etiqueta}"></strong><br>
+                                <small th:text="${m.resumen} + ' · ' + ${#temporals.format(m.fechaCaptura, 'dd/MM HH:mm:ss')}"></small>
+                            </div>
+                            <form th:if="${puedeGestionar}" method="post" th:action="@{/pedidos/{id}/restaurar(id=${pedido.id})}"
+                                  onsubmit="return confirm('¿Revertir el pedido a este punto?');">
+                                <input type="hidden" name="indice" th:value="${st.index}">
+                                <button class="btn secundario pequeno" type="submit">↺ Restaurar</button>
+                            </form>
+                        </li>
+                        <li th:if="${#lists.isEmpty(mementos)}" class="suave">Todavía no hay puntos de restauración para este pedido.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="tarjeta">
+            <h2>Historial de comandos</h2>
+            <table>
+                <thead><tr><th>Fecha</th><th>Comando</th><th>Descripción</th><th>Usuario</th><th>Resultado</th></tr></thead>
+                <tbody>
+                <tr th:each="h : ${historial}">
+                    <td th:text="${#temporals.format(h.fecha, 'dd/MM HH:mm:ss')}"></td>
+                    <td><span class="badge" th:text="${h.comando}"></span></td>
+                    <td th:text="${h.descripcion}"></td>
+                    <td th:text="${h.usuario}"></td>
+                    <td><span class="badge" th:classappend="${h.exitoso} ? 'ok' : 'mal'" th:text="${h.mensaje}"></span></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+</body>
+</html>

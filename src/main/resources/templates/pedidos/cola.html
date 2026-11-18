@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Cola de comandos')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar('cola')}"></aside>
+    <main class="contenido">
+        <header class="cabecera">
+            <div>
+                <h1>Cola de comandos</h1>
+                <p>Las solicitudes encoladas se ejecutan en el mismo orden en que llegaron (FIFO).</p>
+            </div>
+            <div class="acciones-linea" th:if="${puedeGestionar}">
+                <form method="post" th:action="@{/pedidos/cola/procesar}">
+                    <button class="btn exito" type="submit" th:disabled="${#lists.isEmpty(pendientes)}">▶ Ejecutar cola</button>
+                </form>
+                <form method="post" th:action="@{/pedidos/cola/vaciar}">
+                    <button class="btn secundario" type="submit" th:disabled="${#lists.isEmpty(pendientes)}">Vaciar</button>
+                </form>
+            </div>
+        </header>
+        <div th:replace="~{fragments/layout :: mensajes}"></div>
+
+        <div class="tarjeta" th:if="${resultadosCola != null}">
+            <h2>Resultado de la última ejecución</h2>
+            <ul class="lista-limpia">
+                <li th:each="r : ${resultadosCola}">
+                    <span class="badge" th:classappend="${r.exitoso()} ? 'ok' : 'mal'" th:text="${r.exitoso()} ? 'OK' : 'Falló'"></span>
+                    <span th:text="${r.mensaje()}"></span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="tarjeta">
+            <h2 th:text="'Pendientes (' + ${#lists.size(pendientes)} + ')'">Pendientes</h2>
+            <table>
+                <thead><tr><th>#</th><th>Comando</th><th>Encolado por</th><th>Hora</th></tr></thead>
+                <tbody>
+                <tr th:each="c, st : ${pendientes}">
+                    <td th:text="${st.count}"></td>
+                    <td th:text="${c.descripcion}"></td>
+                    <td th:text="${c.usuario}"></td>
+                    <td th:text="${#temporals.format(c.fechaEncolado, 'HH:mm:ss')}"></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(pendientes)}">
+                    <td colspan="4" class="suave">No hay comandos en cola. Usa el botón “Encolar” en el detalle de un pedido.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+</body>
+</html>

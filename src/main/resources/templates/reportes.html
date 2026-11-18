@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Reportes financieros')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar('reportes')}"></aside>
+    <main class="contenido">
+        <header class="cabecera">
+            <div>
+                <h1>Reportes financieros</h1>
+                <p>Acceso protegido: solo Gerente y Contador ven el reporte completo.</p>
+            </div>
+            <form th:if="${reporte != null}" method="post" th:action="@{/reportes/regenerar}">
+                <button class="btn secundario" type="submit">↻ Regenerar ahora</button>
+            </form>
+        </header>
+        <div th:replace="~{fragments/layout :: mensajes}"></div>
+
+        <!-- Sin permiso: el Proxy negó el acceso y solo se muestra el resumen operativo -->
+        <th:block th:if="${denegado != null}">
+            <div class="alerta error"><strong>Acceso restringido.</strong> <span th:text="${denegado}"></span></div>
+            <div class="tarjeta">
+                <h2>Resumen operativo (sin montos)</h2>
+                <div class="grilla g3">
+                    <div class="kpi"><div class="etiqueta">Pedidos procesados</div><div class="valor" th:text="${resumen.pedidosProcesados()}">0</div></div>
+                    <div class="kpi"><div class="etiqueta">Pedidos pendientes</div><div class="valor" th:text="${resumen.pedidosPendientes()}">0</div></div>
+                    <div class="kpi"><div class="etiqueta">Pedidos cancelados</div><div class="valor" th:text="${resumen.pedidosCancelados()}">0</div></div>
+                </div>
+            </div>
+        </th:block>
+
+        <!-- Con permiso: reporte completo entregado por el Proxy -->
+        <th:block th:if="${reporte != null}">
+            <div class="alerta info">
+                Generado el <strong th:text="${#temporals.format(reporte.fechaGeneracion(), 'dd/MM/yyyy HH:mm:ss')}"></strong>
+                <span class="badge" th:classappend="${desdeCache} ? 'pendiente' : 'ok'" th:text="${desdeCache} ? 'Servido desde caché' : 'Recién calculado'"></span>
+                · caché válida por <span th:text="${ttl}"></span> s
+            </div>
+            <div class="grilla g4">
+                <div class="kpi"><div class="etiqueta">Ingresos (pedidos procesados)</div>
+                    <div class="valor" th:text="'S/ ' + ${#numbers.formatDecimal(reporte.ingresosTotales(), 1, 'COMMA', 2, 'POINT')}">0</div></div>
+                <div class="kpi"><div class="etiqueta">Descuentos otorgados</div>
+                    <div class="valor" th:text="'S/ ' + ${#numbers.formatDecimal(reporte.descuentosOtorgados(), 1, 'COMMA', 2, 'POINT')}">0</div></div>
+                <div class="kpi"><div class="etiqueta">Ticket promedio</div>
+                    <div class="valor" th:text="'S/ ' + ${#numbers.formatDecimal(reporte.ticketPromedio(), 1, 'COMMA', 2, 'POINT')}">0</div></div>
+                <div class="kpi"><div class="etiqueta">Procesados / pendientes / cancelados</div>
+                    <div class="valor" th:text="${reporte.pedidosProcesados()} + ' / ' + ${reporte.pedidosPendientes()} + ' / ' + ${reporte.pedidosCancelados()}">0</div></div>
+            </div>
+            <br>
+            <div class="grilla g2">
+                <div class="tarjeta">
+                    <h2>Ventas por pasarela de pago</h2>
+                    <div class="barra" th:each="e : ${reporte.ventasPorPasarela()}">
+                        <div class="fila"><span th:text="${e.key}"></span>
+                            <strong th:text="'S/ ' + ${#numbers.formatDecimal(e.value, 1, 'COMMA', 2, 'POINT')}"></strong></div>
+                        <div class="pista"><div class="relleno" th:style="'width:' + ${barrasPasarela[e.key]} + '%'"></div></div>
+                    </div>
+                    <p class="suave" th:if="${#maps.isEmpty(reporte.ventasPorPasarela())}">Sin ventas procesadas.</p>
+                </div>
+                <div class="tarjeta">
+                    <h2>Ventas por categoría</h2>
+                    <div class="barra" th:each="e : ${reporte.ventasPorCategoria()}">
+                        <div class="fila"><span th:text="${e.key}"></span>
+                            <strong th:text="'S/ ' + ${#numbers.formatDecimal(e.value, 1, 'COMMA', 2, 'POINT')}"></strong></div>
+                        <div class="pista"><div class="relleno" th:style="'width:' + ${barrasCategoria[e.key]} + '%'"></div></div>
+                    </div>
+                    <p class="suave" th:if="${#maps.isEmpty(reporte.ventasPorCategoria())}">Sin ventas procesadas.</p>
+                </div>
+            </div>
+            <div class="tarjeta">
+                <h2>Productos con mayor venta</h2>
+                <table>
+                    <thead><tr><th>Código</th><th>Producto</th><th class="num">Unidades</th><th class="num">Importe</th></tr></thead>
+                    <tbody>
+                    <tr th:each="t : ${reporte.topProductos()}">
+                        <td th:text="${t.codigo()}"></td>
+                        <td th:text="${t.nombre()}"></td>
+                        <td class="num" th:text="${t.unidades()}"></td>
+                        <td class="num" th:text="'S/ ' + ${#numbers.formatDecimal(t.importe(), 1, 'COMMA', 2, 'POINT')}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </th:block>
+
+        <div class="tarjeta" th:if="${verAuditoria}">
+            <h2>Auditoría de accesos (registrada por el Proxy)</h2>
+            <p class="suave">Objeto real de reportes creado:
+                <span class="badge" th:classappend="${objetoRealCreado} ? 'ok' : 'pendiente'" th:text="${objetoRealCreado} ? 'Sí (carga perezosa)' : 'Aún no'"></span></p>
+            <table>
+                <thead><tr><th>Fecha</th><th>Usuario</th><th>Rol</th><th>Operación</th><th>Resultado</th></tr></thead>
+                <tbody>
+                <tr th:each="a : ${auditoria}">
+                    <td th:text="${#temporals.format(a.fecha(), 'dd/MM HH:mm:ss')}"></td>
+                    <td th:text="${a.usuario()}"></td>
+                    <td th:text="${a.rol()}"></td>
+                    <td th:text="${a.operacion()}"></td>
+                    <td><span class="badge" th:classappend="${#strings.startsWith(a.resultado(), 'PERMITIDO')} ? 'ok' : 'mal'" th:text="${a.resultado()}"></span></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Pedidos')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar('pedidos')}"></aside>
+    <main class="contenido">
+        <header class="cabecera">
+            <div>
+                <h1>Pedidos</h1>
+                <p>Cada acción sobre un pedido se ejecuta como un comando y queda registrada en su historial.</p>
+            </div>
+            <div class="acciones-linea">
+                <a class="btn secundario" th:href="@{/pedidos/cola}" th:text="'Cola de comandos (' + ${comandosEnCola} + ')'">Cola</a>
+                <a class="btn" th:if="${puedeGestionar}" th:href="@{/pedidos/nuevo}">+ Nuevo pedido</a>
+            </div>
+        </header>
+        <div th:replace="~{fragments/layout :: mensajes}"></div>
+
+        <div class="tarjeta">
+            <table>
+                <thead>
+                <tr><th>N.°</th><th>Fecha</th><th>Cliente</th><th>Pago</th><th class="num">Unidades</th><th class="num">Total</th><th>Estado</th><th></th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="p : ${pedidos}">
+                    <td th:text="'#' + ${p.id}"></td>
+                    <td th:text="${#temporals.format(p.fechaCreacion, 'dd/MM/yyyy HH:mm')}"></td>
+                    <td th:text="${p.cliente}"></td>
+                    <td th:text="${p.metodoPago}"></td>
+                    <td class="num" th:text="${p.totalUnidades}"></td>
+                    <td class="num" th:text="'S/ ' + ${#numbers.formatDecimal(p.total, 1, 'COMMA', 2, 'POINT')}"></td>
+                    <td><span class="badge" th:classappend="${p.estado.claseCss}" th:text="${p.estado.etiqueta}"></span></td>
+                    <td><a th:href="@{/pedidos/{id}(id=${p.id})}">Ver detalle →</a></td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(pedidos)}"><td colspan="8" class="suave">Aún no hay pedidos.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+</body>
+</html>

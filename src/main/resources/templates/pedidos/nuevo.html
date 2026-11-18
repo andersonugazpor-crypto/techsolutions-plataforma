@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Nuevo pedido')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar('pedidos')}"></aside>
+    <main class="contenido">
+        <header class="cabecera">
+            <div>
+                <h1>Nuevo pedido</h1>
+                <p>Los precios se fijan con la estrategia de precios vigente al momento de crear el pedido.</p>
+            </div>
+            <a class="btn secundario" th:href="@{/pedidos}">← Volver a pedidos</a>
+        </header>
+        <div th:replace="~{fragments/layout :: mensajes}"></div>
+        <div class="alerta aviso" th:if="${#lists.isEmpty(pasarelas)}">
+            No hay pasarelas de pago habilitadas. Pide al administrador que habilite al menos una.
+        </div>
+
+        <form th:action="@{/pedidos}" method="post">
+            <div class="grilla g2">
+                <div class="tarjeta">
+                    <h2>1. Cliente y pago</h2>
+                    <div class="campo">
+                        <label for="cliente">Cliente</label>
+                        <input type="text" id="cliente" name="cliente" required maxlength="120" placeholder="Ej. Bodega Don Pepe">
+                    </div>
+                    <div class="campo">
+                        <label for="metodoPago">Pasarela de pago</label>
+                        <select id="metodoPago" name="metodoPago" required>
+                            <option th:each="p : ${pasarelas}" th:value="${p.codigo()}" th:text="${p.nombre()}"
+                                    th:attr="data-contacto=${p.tipoContacto()}"></option>
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <label for="contactoPago" id="etiquetaContacto">Contacto para el pago</label>
+                        <input type="text" id="contactoPago" name="contactoPago" required maxlength="120">
+                        <div class="ayuda" id="ayudaContacto">Correo para PayPal; celular de 9 dígitos para Yape o Plin.</div>
+                    </div>
+                </div>
+                <div class="tarjeta">
+                    <h2>2. Productos</h2>
+                    <table>
+                        <thead><tr><th>Producto</th><th style="width:110px">Cantidad</th></tr></thead>
+                        <tbody>
+                        <tr th:each="i : ${#numbers.sequence(1, filas)}">
+                            <td>
+                                <select name="productoId" class="sel-producto" style="width:100%" th:attr="aria-label='Producto fila ' + ${i}">
+                                    <option value="">— Seleccionar —</option>
+                                    <option th:each="pr : ${productos}" th:value="${pr.id}"
+                                            th:attr="data-precio=${pr.precioFinal}"
+                                            th:text="${pr.nombre} + ' — S/ ' + ${#numbers.formatDecimal(pr.precioFinal, 1, 'COMMA', 2, 'POINT')} + ' (stock ' + ${pr.stock} + ')'"></option>
+                                </select>
+                            </td>
+                            <td><input type="number" name="cantidad" class="cant" min="1" placeholder="0" style="width:100%" th:attr="aria-label='Cantidad fila ' + ${i}"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <p style="text-align:right; font-size:18px">Total estimado: <strong>S/ <span id="total">0.00</span></strong></p>
+                </div>
+            </div>
+            <div class="acciones-linea">
+                <button class="btn" type="submit" th:disabled="${#lists.isEmpty(pasarelas)}">Crear pedido</button>
+                <a class="btn secundario" th:href="@{/pedidos}">Cancelar</a>
+            </div>
+        </form>
+    </main>
+</div>
+<script>
+    (function () {
+        const metodo = document.getElementById('metodoPago');
+        const etiqueta = document.getElementById('etiquetaContacto');
+        const contacto = document.getElementById('contactoPago');
+        function actualizarContacto() {
+            const opcion = metodo.options[metodo.selectedIndex];
+            if (!opcion) return;
+            const tipo = opcion.getAttribute('data-contacto') || 'contacto';
+            etiqueta.textContent = 'Contacto para el pago (' + tipo + ')';
+            contacto.placeholder = tipo.indexOf('correo') >= 0 ? 'cliente@empresa.pe' : '987654321';
+        }
+        function recalcular() {
+            let total = 0;
+            document.querySelectorAll('tbody tr').forEach(function (fila) {
+                const sel = fila.querySelector('.sel-producto');
+                const cant = fila.querySelector('.cant');
+                if (!sel || !cant || !sel.value) return;
+                const precio = parseFloat(sel.options[sel.selectedIndex].getAttribute('data-precio')) || 0;
+                total += precio * (parseInt(cant.value, 10) || 0);
+            });
+            document.getElementById('total').textContent = total.toFixed(2);
+        }
+        if (metodo) { metodo.addEventListener('change', actualizarContacto); actualizarContacto(); }
+        document.querySelectorAll('.sel-producto, .cant').forEach(function (el) {
+            el.addEventListener('change', recalcular);
+            el.addEventListener('input', recalcular);
+        });
+    })();
+</script>
+</body>
+</html>

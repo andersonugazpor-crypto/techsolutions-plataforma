@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Inventario')}"></head>
+<body>
+<div class="app">
+    <aside th:replace="~{fragments/layout :: sidebar('inventario')}"></aside>
+    <main class="contenido">
+        <header class="cabecera">
+            <div>
+                <h1>Inventario</h1>
+                <p>Configura el stock mínimo de cada producto. Cuando el stock cae por debajo, Gerencia y Compras reciben una alerta automática.</p>
+            </div>
+            <span class="badge" th:classappend="${bajoMinimo > 0} ? 'mal' : 'ok'"
+                  th:text="${bajoMinimo} + ' producto(s) bajo el mínimo'"></span>
+        </header>
+        <div th:replace="~{fragments/layout :: mensajes}"></div>
+        <div class="alerta aviso" th:unless="${puedeEditar}">Tu rol solo puede consultar el inventario.</div>
+
+        <form class="tarjeta filtros" th:action="@{/inventario}" method="get">
+            <div class="campo">
+                <label for="texto">Buscar</label>
+                <input type="text" id="texto" name="texto" th:value="${filtro.texto()}" placeholder="Nombre o código">
+            </div>
+            <div class="campo">
+                <label for="categoria">Categoría</label>
+                <select id="categoria" name="categoria">
+                    <option value="">Todas</option>
+                    <option th:each="c : ${categorias}" th:value="${c}" th:text="${c}" th:selected="${c == filtro.categoria()}"></option>
+                </select>
+            </div>
+            <label class="check"><input type="checkbox" name="soloBajo" value="true" th:checked="${filtro.soloStockBajo()}"> Solo bajo el mínimo</label>
+            <button class="btn" type="submit">Filtrar</button>
+            <a class="btn secundario" th:href="@{/inventario}">Limpiar</a>
+        </form>
+
+        <div class="tarjeta">
+            <table>
+                <thead>
+                <tr>
+                    <th>Código</th><th>Producto</th><th>Categoría</th>
+                    <th class="num">Stock</th><th>Estado</th><th>Stock mínimo</th>
+                    <th th:if="${puedeEditar}">Movimiento</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="p : ${pagina.elementos}" th:classappend="${p.bajoMinimo} ? 'fila-alerta'">
+                    <td th:text="${p.codigo}"></td>
+                    <td th:text="${p.nombre}"></td>
+                    <td th:text="${p.categoria}"></td>
+                    <td class="num"><strong th:text="${p.stock}"></strong></td>
+                    <td><span class="badge" th:classappend="${p.bajoMinimo} ? 'mal' : 'ok'" th:text="${p.bajoMinimo} ? 'Bajo mínimo' : 'Normal'"></span></td>
+                    <td>
+                        <form th:if="${puedeEditar}" class="acciones-linea" method="post" th:action="@{/inventario/{id}/minimo(id=${p.id})}">
+                            <input type="number" class="mini" name="minimo" min="0" th:value="${p.stockMinimo}" required
+                                   th:attr="aria-label='Stock mínimo de ' + ${p.nombre}">
+                            <input type="hidden" name="texto" th:value="${filtro.texto()}">
+                            <input type="hidden" name="categoria" th:value="${filtro.categoria()}">
+                            <input type="hidden" name="soloBajo" th:value="${filtro.soloStockBajo()}">
+                            <input type="hidden" name="pagina" th:value="${pagina.pagina}">
+                            <button class="btn secundario pequeno" type="submit">Guardar</button>
+                        </form>
+                        <span th:unless="${puedeEditar}" th:text="${p.stockMinimo}"></span>
+                    </td>
+                    <td th:if="${puedeEditar}">
+                        <div class="acciones-linea">
+                            <form class="acciones-linea" method="post" th:action="@{/inventario/{id}/entrada(id=${p.id})}">
+                                <input type="number" class="mini" name="cantidad" min="1" value="10" required
+                                       th:attr="aria-label='Cantidad de entrada de ' + ${p.nombre}">
+                                <input type="hidden" name="texto" th:value="${filtro.texto()}">
+                                <input type="hidden" name="categoria" th:value="${filtro.categoria()}">
+                                <input type="hidden" name="soloBajo" th:value="${filtro.soloStockBajo()}">
+                                <input type="hidden" name="pagina" th:value="${pagina.pagina}">
+                                <button class="btn exito pequeno" type="submit" title="Registrar entrada (compra recibida)">+ Entrada</button>
+                            </form>
+                            <form class="acciones-linea" method="post" th:action="@{/inventario/{id}/salida(id=${p.id})}">
+                                <input type="number" class="mini" name="cantidad" min="1" value="1" required
+                                       th:attr="aria-label='Cantidad de salida de ' + ${p.nombre}">
+                                <input type="hidden" name="texto" th:value="${filtro.texto()}">
+                                <input type="hidden" name="categoria" th:value="${filtro.categoria()}">
+                                <input type="hidden" name="soloBajo" th:value="${filtro.soloStockBajo()}">
+                                <input type="hidden" name="pagina" th:value="${pagina.pagina}">
+                                <button class="btn secundario pequeno" type="submit" title="Registrar salida (merma o ajuste)">− Salida</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${pagina.totalElementos == 0}"><td colspan="7" class="suave">No hay productos con esos filtros.</td></tr>
+                </tbody>
+            </table>
+            <div class="paginacion">
+                <span class="suave" th:text="'Mostrando ' + ${pagina.desde} + '–' + ${pagina.hasta} + ' de ' + ${pagina.totalElementos}"></span>
+                <div class="acciones-linea">
+                    <a class="btn secundario pequeno" th:if="${pagina.tieneAnterior}"
+                       th:href="@{/inventario(texto=${filtro.texto()},categoria=${filtro.categoria()},soloBajo=${filtro.soloStockBajo()},pagina=${pagina.pagina - 1})}">← Anterior</a>
+                    <span th:text="'Página ' + ${pagina.numeroVisible} + ' de ' + ${pagina.totalPaginas}"></span>
+                    <a class="btn secundario pequeno" th:if="${pagina.tieneSiguiente}"
+                       th:href="@{/inventario(texto=${filtro.texto()},categoria=${filtro.categoria()},soloBajo=${filtro.soloStockBajo()},pagina=${pagina.pagina + 1})}">Siguiente →</a>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>
