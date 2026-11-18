@@ -1,0 +1,33 @@
+classDiagram
+    direction LR
+    class Iterador~T~ {
+        <<interface>>
+        +tieneSiguiente() boolean
+        +siguiente() T
+    }
+    class IteradorProductos {
+        -buffer : List
+        -siguienteLote : int
+        +tieneSiguiente() boolean
+        +siguiente() Producto
+        -cargarSiguienteLote()
+    }
+    class CatalogoProductos {
+        +crearIterador(FiltroCatalogo) Iterador
+        +crearIteradorDePagina(filtro, pagina, tamano) Iterador
+        +pagina(filtro, pagina, tamano, aVista) PaginaCatalogo
+    }
+    class FuenteProductos {
+        <<interface>>
+        +lote(filtro, numero, tamano) List
+        +contar(filtro) long
+    }
+    class FuenteProductosJpa
+    class PaginaCatalogo~T~
+    class ServicioCatalogo
+    Iterador <|.. IteradorProductos
+    CatalogoProductos ..> IteradorProductos : crea
+    IteradorProductos --> FuenteProductos : pide lotes
+    FuenteProductos <|.. FuenteProductosJpa
+    CatalogoProductos ..> PaginaCatalogo : devuelve
+    ServicioCatalogo --> CatalogoProductos

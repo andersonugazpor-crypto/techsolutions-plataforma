@@ -1,0 +1,65 @@
+classDiagram
+    direction TB
+    class ComandoPedido {
+        <<interface>>
+        +nombre() String
+        +descripcion() String
+        +pedidoId() Long
+        +requiereMemento() boolean
+        +ejecutar() ResultadoComando
+    }
+    class InvocadorComandos {
+        -cola : Queue
+        +ejecutar(ComandoPedido, usuario) ResultadoComando
+        +encolar(ComandoPedido, usuario)
+        +procesarCola() List
+    }
+    class ReceptorPedidos {
+        <<interface>>
+        +crear(NuevoPedido) Pedido
+        +procesar(id)
+        +aplicarDescuento(id, pct)
+        +cancelar(id)
+        +restaurar(id, PedidoMemento)
+    }
+    class ServicioPedidos
+    class CrearPedidoComando
+    class ProcesarPedidoComando
+    class AplicarDescuentoComando
+    class CancelarPedidoComando
+    class RestaurarPedidoComando
+    class FabricaComandos
+    class RegistroHistorial {
+        <<interface>>
+        +registrar(comando, usuario, resultado)
+    }
+    class Pedido {
+        +crearMemento(etiqueta) PedidoMemento
+        +restaurar(PedidoMemento)
+    }
+    class PedidoMemento {
+        -estado
+        -porcentajeDescuento
+        -codigoTransaccion
+        +getEtiqueta() String
+    }
+    class HistorialMementos {
+        +guardar(id, PedidoMemento)
+        +listar(id) List
+        +extraerParaRestaurar(id, indice) PedidoMemento
+    }
+    ComandoPedido <|.. CrearPedidoComando
+    ComandoPedido <|.. ProcesarPedidoComando
+    ComandoPedido <|.. AplicarDescuentoComando
+    ComandoPedido <|.. CancelarPedidoComando
+    ComandoPedido <|.. RestaurarPedidoComando
+    InvocadorComandos o-- ComandoPedido
+    InvocadorComandos --> HistorialMementos : guarda antes de ejecutar
+    InvocadorComandos --> RegistroHistorial
+    ReceptorPedidos <|.. ServicioPedidos
+    CrearPedidoComando --> ReceptorPedidos
+    ProcesarPedidoComando --> ReceptorPedidos
+    RestaurarPedidoComando --> HistorialMementos
+    FabricaComandos ..> ComandoPedido : crea
+    Pedido ..> PedidoMemento : origina
+    HistorialMementos o-- PedidoMemento : cuida

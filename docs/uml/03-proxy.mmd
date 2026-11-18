@@ -1,0 +1,37 @@
+classDiagram
+    direction LR
+    class ServicioReportes {
+        <<interface>>
+        +reporteCompleto() ReporteFinanciero
+        +resumenOperativo() ResumenOperativo
+    }
+    class ProxyServicioReportes {
+        -real : ServicioReportes
+        -reporteEnCache : ReporteFinanciero
+        -cacheVigenteHasta : Instant
+        +reporteCompleto() ReporteFinanciero
+        +resumenOperativo() ResumenOperativo
+        +invalidarCache()
+        +auditoria() List
+        -autenticar() UsuarioSesion
+        -objetoReal() ServicioReportes
+    }
+    class ServicioReportesReal {
+        +reporteCompleto() ReporteFinanciero
+        +resumenOperativo() ResumenOperativo
+    }
+    class ReporteController
+    class ProveedorUsuarioActual {
+        <<interface>>
+        +actual() Optional
+    }
+    class VerificadorCredenciales {
+        <<interface>>
+        +esValido(UsuarioSesion) boolean
+    }
+    ReporteController --> ServicioReportes : solo conoce la interfaz
+    ServicioReportes <|.. ProxyServicioReportes
+    ServicioReportes <|.. ServicioReportesReal
+    ProxyServicioReportes --> ServicioReportesReal : crea de forma perezosa
+    ProxyServicioReportes --> ProveedorUsuarioActual
+    ProxyServicioReportes --> VerificadorCredenciales

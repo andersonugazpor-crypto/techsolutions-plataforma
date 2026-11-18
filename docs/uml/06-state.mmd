@@ -1,0 +1,10 @@
+stateDiagram-v2
+    direction LR
+    [*] --> Pendiente : crear
+    Pendiente --> Pendiente : aplicarDescuento
+    Pendiente --> Procesado : procesar (cobra y descuenta stock)
+    Pendiente --> Cancelado : cancelar
+    Procesado --> Cancelado : cancelar (devuelve stock)
+    Procesado --> Pendiente : restaurar memento
+    Cancelado --> Pendiente : restaurar memento
+    Cancelado --> Procesado : restaurar memento

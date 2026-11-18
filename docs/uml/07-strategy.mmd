@@ -1,0 +1,31 @@
+classDiagram
+    direction LR
+    class CalculadoraPrecios {
+        -estrategias : Map
+        +precioDe(Producto) BigDecimal
+        +estrategiaActiva() EstrategiaPrecio
+        +cambiarEstrategia(codigo, descuento, recargo)
+    }
+    class EstrategiaPrecio {
+        <<interface>>
+        +codigo() String
+        +nombre() String
+        +calcular(Producto, ParametrosPrecio) BigDecimal
+    }
+    class PrecioEstandar
+    class PrecioDescuentoPorcentual
+    class PrecioDinamico {
+        ~ajustePorDemanda(Producto)
+        ~ajustePorEscasez(Producto)
+        ~ajustePorTemporada(ParametrosPrecio)
+    }
+    class ConfiguracionPrecios {
+        <<interface>>
+        +codigoEstrategiaActiva() String
+        +parametros() ParametrosPrecio
+    }
+    CalculadoraPrecios o-- EstrategiaPrecio
+    CalculadoraPrecios --> ConfiguracionPrecios
+    EstrategiaPrecio <|.. PrecioEstandar
+    EstrategiaPrecio <|.. PrecioDescuentoPorcentual
+    EstrategiaPrecio <|.. PrecioDinamico

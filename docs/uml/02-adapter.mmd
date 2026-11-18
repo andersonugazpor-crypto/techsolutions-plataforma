@@ -1,0 +1,43 @@
+classDiagram
+    direction LR
+    class PasarelaPago {
+        <<interface>>
+        +codigo() String
+        +nombre() String
+        +tipoContacto() String
+        +pagar(SolicitudPago) ResultadoPago
+    }
+    class ServicioPagos {
+        +pasarelasHabilitadas() List
+        +cobrar(codigo, SolicitudPago) ResultadoPago
+    }
+    class RegistroPasarelas {
+        +buscar(codigo) Optional
+        +todas() Collection
+    }
+    class EstadoPasarelas {
+        <<interface>>
+        +estaHabilitada(codigo) boolean
+        +cambiar(codigo, boolean)
+    }
+    class PayPalAdaptador
+    class YapeAdaptador
+    class PlinAdaptador
+    class PayPalSdk {
+        +createPayment(email, double usd, currency) PayPalResponse
+    }
+    class YapeApi {
+        +enviarCobro(celular, long centimos, concepto) int
+    }
+    class PlinClient {
+        +transfer(Map) Map
+    }
+    ServicioPagos --> RegistroPasarelas
+    ServicioPagos --> EstadoPasarelas
+    RegistroPasarelas o-- PasarelaPago
+    PasarelaPago <|.. PayPalAdaptador
+    PasarelaPago <|.. YapeAdaptador
+    PasarelaPago <|.. PlinAdaptador
+    PayPalAdaptador --> PayPalSdk : adapta
+    YapeAdaptador --> YapeApi : adapta
+    PlinAdaptador --> PlinClient : adapta

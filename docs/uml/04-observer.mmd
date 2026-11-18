@@ -1,0 +1,40 @@
+classDiagram
+    direction LR
+    class SujetoInventario {
+        <<interface>>
+        +suscribir(ObservadorInventario)
+        +desuscribir(ObservadorInventario)
+        +notificar(EventoStockBajo)
+    }
+    class PublicadorStock {
+        -observadores : List
+        +evaluarCambio(Producto, stockAnterior, minimoAnterior) boolean
+    }
+    class ObservadorInventario {
+        <<interface>>
+        +actualizar(EventoStockBajo)
+    }
+    class NotificadorPorRol {
+        <<abstract>>
+        #rolDestino() Rol
+        #mensaje(EventoStockBajo) String
+    }
+    class NotificadorGerencia
+    class NotificadorCompras
+    class RegistroLogStock
+    class ServicioInventario {
+        +descontarVenta(id, cant)
+        +configurarStockMinimo(id, minimo)
+    }
+    class BandejaNotificaciones {
+        <<interface>>
+        +enviar(Rol, titulo, mensaje)
+    }
+    SujetoInventario <|.. PublicadorStock
+    PublicadorStock o-- "*" ObservadorInventario
+    ObservadorInventario <|.. NotificadorPorRol
+    ObservadorInventario <|.. RegistroLogStock
+    NotificadorPorRol <|-- NotificadorGerencia
+    NotificadorPorRol <|-- NotificadorCompras
+    NotificadorPorRol --> BandejaNotificaciones
+    ServicioInventario --> PublicadorStock

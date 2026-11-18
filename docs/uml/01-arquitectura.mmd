@@ -1,0 +1,24 @@
+flowchart TB
+    subgraph Vista["Capa de presentación (Thymeleaf)"]
+        V1[catalogo.html] --- V2[pedidos/*.html] --- V3[reportes.html] --- V4[inventario.html] --- V5[admin/configuracion.html]
+    end
+    subgraph Web["Controladores (GRASP Controlador)"]
+        C1[CatalogoController] --- C2[PedidoController] --- C3[ReporteController] --- C4[InventarioController] --- C5[AdminController]
+    end
+    subgraph Negocio["Lógica de negocio y patrones"]
+        P1[Iterator<br/>CatalogoProductos] 
+        P2[Command + Memento<br/>InvocadorComandos]
+        P3[Proxy<br/>ProxyServicioReportes]
+        P4[Observer<br/>PublicadorStock]
+        P5[Strategy<br/>CalculadoraPrecios]
+        P6[Adapter<br/>ServicioPagos]
+        P7[State<br/>EstadoPedido]
+    end
+    subgraph Datos["Persistencia (Spring Data JPA)"]
+        R[(H2 / MySQL)]
+    end
+    subgraph Externos["Pasarelas externas (simuladas)"]
+        E1[PayPal SDK] --- E2[Yape API] --- E3[Plin Client]
+    end
+    Vista --> Web --> Negocio --> Datos
+    P6 --> Externos
