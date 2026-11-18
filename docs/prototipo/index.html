@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototipo navegable · TechSolutions</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", system-ui, Arial, sans-serif; background: #e5e7eb; color: #111827; font-size: 14px; }
+  .pantalla { display: none; width: 1280px; min-height: 800px; margin: 0 auto; background: #fff; }
+  .pantalla.visible { display: flex; }
+  .sb { width: 220px; background: #374151; color: #e5e7eb; padding: 18px 12px; display: flex; flex-direction: column; gap: 3px; }
+  .sb .logo { display: flex; gap: 8px; align-items: center; margin-bottom: 18px; font-weight: 700; color: #fff; }
+  .sb .logo span { width: 32px; height: 32px; background: #9ca3af; border-radius: 6px; display: grid; place-items: center; color: #111827; }
+  .sb a { color: #e5e7eb; text-decoration: none; padding: 8px 10px; border-radius: 6px; display: flex; justify-content: space-between; }
+  .sb a.on { background: #fff; color: #111827; font-weight: 600; }
+  .sb .sec { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: #9ca3af; margin: 10px 10px 2px; }
+  .sb .yo { margin-top: auto; border-top: 1px solid #4b5563; padding-top: 10px; font-size: 12px; }
+  .main { flex: 1; padding: 24px 28px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: #6b7280; margin: 0 0 18px; }
+  .fila { display: flex; gap: 14px; flex-wrap: wrap; }
+  .caja { border: 2px dashed #9ca3af; border-radius: 8px; padding: 14px; margin-bottom: 14px; background: #fafafa; }
+  .caja h3 { margin: 0 0 10px; font-size: 14px; }
+  .kpi { flex: 1; border: 2px solid #d1d5db; border-radius: 8px; padding: 12px; }
+  .kpi b { display: block; font-size: 24px; margin-top: 4px; }
+  .btn { display: inline-block; border: 2px solid #111827; border-radius: 6px; padding: 6px 12px; background: #111827; color: #fff; text-decoration: none; font-weight: 600; font-size: 13px; cursor: pointer; }
+  .btn.s { background: #fff; color: #111827; }
+  .inp { display: inline-block; border: 1.5px solid #9ca3af; border-radius: 6px; padding: 6px 10px; min-width: 120px; color: #9ca3af; background: #fff; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 7px 6px; border-bottom: 1px solid #e5e7eb; }
+  th { font-size: 11px; color: #6b7280; text-transform: uppercase; }
+  .tag { display: inline-block; border: 1.5px solid #6b7280; border-radius: 999px; padding: 1px 8px; font-size: 11px; }
+  .tag.r { border-color: #b91c1c; color: #b91c1c; }
+  .tag.v { border-color: #15803d; color: #15803d; }
+  .tag.a { border-color: #b45309; color: #b45309; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .card { border: 2px solid #d1d5db; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+  .img { height: 60px; background: repeating-linear-gradient(45deg, #e5e7eb, #e5e7eb 8px, #f3f4f6 8px, #f3f4f6 16px); border-radius: 4px; }
+  .barra { height: 10px; background: #e5e7eb; border-radius: 999px; margin: 4px 0 10px; } .barra i { display: block; height: 100%; background: #6b7280; border-radius: 999px; }
+  .nota { position: relative; background: #fef9c3; border: 1px solid #facc15; padding: 8px 10px; font-size: 12px; border-radius: 6px; margin-bottom: 12px; }
+  .login { width: 100%; display: grid; place-items: center; background: #d1d5db; }
+  .login .caja { width: 380px; background: #fff; }
+  .indice { width: 1280px; margin: 14px auto; display: flex; gap: 6px; flex-wrap: wrap; font-size: 12px; }
+  .indice a { background: #fff; border: 1px solid #9ca3af; padding: 4px 8px; border-radius: 6px; color: #111827; text-decoration: none; }
+  @media print { .indice { display: none; } }
+</style>
+</head>
+<body>
+<div class="indice" id="indice"></div>
+
+<!-- 1. LOGIN -->
+<section class="pantalla" id="login">
+  <div class="login">
+    <div class="caja">
+      <h1>TechSolutions</h1><p class="sub">Plataforma de gestión empresarial</p>
+      <p>Usuario<br><span class="inp" style="width:100%">usuario</span></p>
+      <p>Contraseña<br><span class="inp" style="width:100%">••••••</span></p>
+      <a class="btn" href="#inicio" style="width:100%; text-align:center">Ingresar</a>
+      <div class="nota" style="margin-top:12px">Tabla de usuarios de demostración por rol (admin, gerente, contador, compras, vendedor).</div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. INICIO -->
+<section class="pantalla" id="inicio">
+  <nav class="sb" data-on="inicio"></nav>
+  <div class="main">
+    <div class="fila" style="justify-content:space-between"><div><h1>Hola, Luis Ramírez</h1><p class="sub">Resumen de ventas, inventario y pagos</p></div><a class="btn" href="#nuevo">+ Nuevo pedido</a></div>
+    <div class="fila" style="margin-bottom:14px">
+      <a class="kpi" href="#pedidos">Pedidos pendientes<b>2</b></a>
+      <a class="kpi" href="#pedidos">Pedidos procesados<b>2</b></a>
+      <a class="kpi" href="#inventario">Productos bajo mínimo<b style="color:#b91c1c">4</b></a>
+      <a class="kpi" href="#notificaciones">Notificaciones sin leer<b>3</b></a>
+    </div>
+    <div class="fila">
+      <div class="caja" style="flex:1"><h3>Estrategia de precios</h3><span class="tag">Precio estándar</span></div>
+      <div class="caja" style="flex:1"><h3>Pasarelas habilitadas</h3><span class="tag v">PayPal</span> <span class="tag v">Yape</span> <span class="tag v">Plin</span></div>
+      <div class="caja" style="flex:1"><h3>Cola de comandos</h3>0 comandos esperando · <a href="#cola">Ver cola →</a></div>
+    </div>
+    <div class="caja"><h3>Actividad reciente</h3>
+      <table><tr><th>Fecha</th><th>Acción</th><th>Detalle</th><th>Usuario</th><th>Resultado</th></tr>
+        <tr><td>18/11 15:02</td><td><span class="tag">PROCESAR</span></td><td><a href="#detalle">Procesar el pedido #2</a></td><td>sistema</td><td><span class="tag v">OK</span></td></tr>
+        <tr><td>18/11 15:01</td><td><span class="tag">DESCUENTO</span></td><td>Aplicar 5% al pedido #2</td><td>sistema</td><td><span class="tag v">OK</span></td></tr>
+      </table></div>
+  </div>
+</section>
+
+<!-- 3. CATÁLOGO -->
+<section class="pantalla" id="catalogo">
+  <nav class="sb" data-on="catalogo"></nav>
+  <div class="main">
+    <h1>Catálogo de productos</h1><p class="sub">Precios calculados con la estrategia activa</p>
+    <div class="caja fila" style="align-items:center"><span class="inp">Buscar nombre o código</span><span class="inp">Categoría ▾</span><span class="inp">12 por página ▾</span><span>☐ Solo stock bajo</span><a class="btn">Buscar</a><a class="btn s">Limpiar</a></div>
+    <div class="grid">
+      <div class="card"><div class="img"></div><small>ABR-001</small><b>Arroz extra 5 kg</b><span class="tag">Abarrotes</span><b>S/ 24.90</b><span class="tag v">Stock: 65</span></div>
+      <div class="card"><div class="img"></div><small>ABR-002</small><b>Aceite vegetal 1 L</b><span class="tag">Abarrotes</span><b>S/ 11.50</b><span class="tag v">Stock: 45</span></div>
+      <div class="card"><div class="img"></div><small>BEB-005</small><b>Jugo de naranja 1 L</b><span class="tag">Bebidas</span><b>S/ 5.40</b><span class="tag r">Stock bajo: 9</span></div>
+      <div class="card"><div class="img"></div><small>TEC-001</small><b>Mouse inalámbrico</b><span class="tag">Tecnología</span><b>S/ 39.90</b><span class="tag v">Stock: 13</span></div>
+    </div>
+    <div class="fila" style="justify-content:space-between; margin-top:16px"><span>Mostrando 1–12 de 36 productos</span><span><a class="btn s">← Anterior</a> Página 1 de 3 <a class="btn s">Siguiente →</a></span></div>
+  </div>
+</section>
+
+<!-- 4. INVENTARIO -->
+<section class="pantalla" id="inventario">
+  <nav class="sb" data-on="inventario"></nav>
+  <div class="main">
+    <h1>Inventario</h1><p class="sub">Stock mínimo configurable por producto. Alertas automáticas a Gerencia y Compras.</p>
+    <div class="caja fila"><span class="inp">Buscar</span><span class="inp">Categoría ▾</span><span>☐ Solo bajo el mínimo</span><a class="btn">Filtrar</a></div>
+    <div class="caja"><table>
+      <tr><th>Código</th><th>Producto</th><th>Stock</th><th>Estado</th><th>Stock mínimo</th><th>Movimiento</th></tr>
+      <tr><td>ABR-005</td><td>Atún en trozos</td><td>16</td><td><span class="tag v">Normal</span></td><td><span class="inp" style="min-width:50px">15</span> <a class="btn s">Guardar</a></td><td><span class="inp" style="min-width:40px">10</span> <a class="btn">+ Entrada</a> <span class="inp" style="min-width:40px">1</span> <a class="btn s">− Salida</a></td></tr>
+      <tr style="background:#fef2f2"><td>BEB-005</td><td>Jugo de naranja</td><td>9</td><td><span class="tag r">Bajo mínimo</span></td><td><span class="inp" style="min-width:50px">12</span> <a class="btn s">Guardar</a></td><td><span class="inp" style="min-width:40px">10</span> <a class="btn">+ Entrada</a> <span class="inp" style="min-width:40px">1</span> <a class="btn s">− Salida</a></td></tr>
+    </table></div>
+    <div class="nota">Al guardar una salida que deja el stock bajo el mínimo → se genera una notificación para Gerente y Compras (<a href="#notificaciones">ver</a>).</div>
+  </div>
+</section>
+
+<!-- 5. PEDIDOS -->
+<section class="pantalla" id="pedidos">
+  <nav class="sb" data-on="pedidos"></nav>
+  <div class="main">
+    <div class="fila" style="justify-content:space-between"><div><h1>Pedidos</h1><p class="sub">Cada acción es un comando registrado en el historial</p></div><span><a class="btn s" href="#cola">Cola de comandos (0)</a> <a class="btn" href="#nuevo">+ Nuevo pedido</a></span></div>
+    <div class="caja"><table>
+      <tr><th>N.°</th><th>Fecha</th><th>Cliente</th><th>Pago</th><th>Total</th><th>Estado</th><th></th></tr>
+      <tr><td>#4</td><td>18/11 15:00</td><td>Restaurante El Sabor Norteño</td><td>YAPE</td><td>S/ 292.20</td><td><span class="tag a">Pendiente</span></td><td><a href="#detalle">Ver detalle →</a></td></tr>
+      <tr><td>#3</td><td>18/11 15:00</td><td>Minimarket Los Olivos</td><td>PLIN</td><td>S/ 185.10</td><td><span class="tag r">Cancelado</span></td><td><a href="#detalle">Ver detalle →</a></td></tr>
+      <tr><td>#2</td><td>18/11 15:00</td><td>Librería San Marcos</td><td>PAYPAL</td><td>S/ 261.06</td><td><span class="tag v">Procesado</span></td><td><a href="#detalle">Ver detalle →</a></td></tr>
+    </table></div>
+  </div>
+</section>
+
+<!-- 6. NUEVO PEDIDO -->
+<section class="pantalla" id="nuevo">
+  <nav class="sb" data-on="pedidos"></nav>
+  <div class="main">
+    <h1>Nuevo pedido</h1><p class="sub">Los precios se fijan con la estrategia vigente</p>
+    <div class="fila">
+      <div class="caja" style="flex:1"><h3>1. Cliente y pago</h3>
+        <p>Cliente<br><span class="inp" style="width:100%">Ej. Bodega Don Pepe</span></p>
+        <p>Pasarela de pago<br><span class="inp" style="width:100%">Yape ▾ (solo habilitadas)</span></p>
+        <p>Contacto para el pago (celular)<br><span class="inp" style="width:100%">987654321</span></p></div>
+      <div class="caja" style="flex:1"><h3>2. Productos</h3>
+        <table><tr><th>Producto</th><th>Cantidad</th></tr>
+          <tr><td><span class="inp" style="width:100%">Arroz extra — S/ 24.90 (stock 65) ▾</span></td><td><span class="inp" style="min-width:60px">5</span></td></tr>
+          <tr><td><span class="inp" style="width:100%">— Seleccionar — ▾</span></td><td><span class="inp" style="min-width:60px">0</span></td></tr>
+          <tr><td><span class="inp" style="width:100%">— Seleccionar — ▾</span></td><td><span class="inp" style="min-width:60px">0</span></td></tr></table>
+        <p style="text-align:right">Total estimado: <b>S/ 124.50</b></p></div>
+    </div>
+    <a class="btn" href="#detalle">Crear pedido</a> <a class="btn s" href="#pedidos">Cancelar</a>
+  </div>
+</section>
+
+<!-- 7. DETALLE -->
+<section class="pantalla" id="detalle">
+  <nav class="sb" data-on="pedidos"></nav>
+  <div class="main">
+    <h1>Pedido #4 <span class="tag a">Pendiente</span></h1><p class="sub">Restaurante El Sabor Norteño · 18/11/2026</p>
+    <div class="fila">
+      <div class="caja" style="flex:1"><h3>Detalle</h3>
+        <table><tr><th>Producto</th><th>Cant.</th><th>P. unit.</th><th>Subtotal</th></tr>
+          <tr><td>Arroz extra 5 kg</td><td>10</td><td>24.90</td><td>249.00</td></tr>
+          <tr><td>Inca Kola 1.5 L</td><td>6</td><td>7.20</td><td>43.20</td></tr>
+          <tr><td colspan="3">Descuento (0%)</td><td>− 0.00</td></tr>
+          <tr><td colspan="3"><b>Total</b></td><td><b>S/ 292.20</b></td></tr></table>
+        <p>Pasarela: Yape · Contacto: 955111222 · Transacción: —</p></div>
+      <div style="flex:1">
+        <div class="caja"><h3>Acciones</h3>
+          <p>Procesar: <a class="btn">Procesar</a> <a class="btn s" href="#cola">Encolar</a></p>
+          <p>Descuento: <span class="inp" style="min-width:50px">5</span> % <a class="btn">Aplicar</a> <a class="btn s">Encolar</a></p>
+          <p>Cancelar: <a class="btn">Cancelar pedido</a> <a class="btn s">Encolar</a></p>
+          <div class="nota">Botones deshabilitados según el estado del pedido (State).</div></div>
+        <div class="caja"><h3>Puntos de restauración (deshacer)</h3>
+          <table><tr><td><b>1. Antes de descuento</b><br><small>Estado Pendiente, descuento 0% · 15:03</small></td><td><a class="btn s">↺ Restaurar</a></td></tr>
+                 <tr><td><b>2. Antes de procesar</b><br><small>Estado Pendiente, descuento 5% · 15:04</small></td><td><a class="btn s">↺ Restaurar</a></td></tr></table></div>
+      </div>
+    </div>
+    <div class="caja"><h3>Historial de comandos</h3><table><tr><th>Fecha</th><th>Comando</th><th>Descripción</th><th>Usuario</th><th>Resultado</th></tr>
+      <tr><td>15:00</td><td><span class="tag">CREAR</span></td><td>Crear pedido para Restaurante...</td><td>vendedor</td><td><span class="tag v">Pedido #4 creado</span></td></tr></table></div>
+  </div>
+</section>
+
+<!-- 8. COLA -->
+<section class="pantalla" id="cola">
+  <nav class="sb" data-on="cola"></nav>
+  <div class="main">
+    <div class="fila" style="justify-content:space-between"><div><h1>Cola de comandos</h1><p class="sub">Se ejecutan en orden de llegada (FIFO)</p></div><span><a class="btn">▶ Ejecutar cola</a> <a class="btn s">Vaciar</a></span></div>
+    <div class="caja"><h3>Pendientes (2)</h3><table><tr><th>#</th><th>Comando</th><th>Encolado por</th><th>Hora</th></tr>
+      <tr><td>1</td><td>Aplicar 5% de descuento al pedido #4</td><td>vendedor</td><td>15:10:02</td></tr>
+      <tr><td>2</td><td>Procesar (cobrar y despachar) el pedido #4</td><td>vendedor</td><td>15:10:09</td></tr></table></div>
+  </div>
+</section>
+
+<!-- 9. REPORTES (autorizado) -->
+<section class="pantalla" id="reportes">
+  <nav class="sb" data-on="reportes"></nav>
+  <div class="main">
+    <div class="fila" style="justify-content:space-between"><div><h1>Reportes financieros</h1><p class="sub">Solo Gerente y Contador ven el reporte completo</p></div><a class="btn s">↻ Regenerar ahora</a></div>
+    <div class="nota">Generado 18/11 15:20:11 · <span class="tag a">Servido desde caché</span> · caché válida por 60 s</div>
+    <div class="fila" style="margin-bottom:14px"><div class="kpi">Ingresos<b>S/ 497.26</b></div><div class="kpi">Descuentos<b>S/ 13.74</b></div><div class="kpi">Ticket promedio<b>S/ 248.63</b></div><div class="kpi">Proc. / pend. / canc.<b>2 / 1 / 1</b></div></div>
+    <div class="fila">
+      <div class="caja" style="flex:1"><h3>Ventas por pasarela</h3>PAYPAL<div class="barra"><i style="width:100%"></i></div>YAPE<div class="barra"><i style="width:90%"></i></div></div>
+      <div class="caja" style="flex:1"><h3>Ventas por categoría</h3>Librería<div class="barra"><i style="width:100%"></i></div>Abarrotes<div class="barra"><i style="width:86%"></i></div></div>
+    </div>
+    <div class="caja"><h3>Auditoría de accesos (Proxy)</h3><table><tr><th>Fecha</th><th>Usuario</th><th>Rol</th><th>Resultado</th></tr>
+      <tr><td>15:20</td><td>gerente</td><td>Gerente</td><td><span class="tag v">PERMITIDO (desde caché)</span></td></tr>
+      <tr><td>15:18</td><td>vendedor</td><td>Vendedor</td><td><span class="tag r">DENEGADO (rol Vendedor)</span></td></tr></table></div>
+    <p><a href="#reportes-denegado">Ver cómo lo ve un vendedor →</a></p>
+  </div>
+</section>
+
+<!-- 10. REPORTES (denegado) -->
+<section class="pantalla" id="reportes-denegado">
+  <nav class="sb" data-on="reportes"></nav>
+  <div class="main">
+    <h1>Reportes financieros</h1><p class="sub">Vista de un usuario sin rol autorizado</p>
+    <div class="caja" style="border-color:#b91c1c"><b>Acceso restringido.</b> Solo los roles Gerente y Contador pueden ver el reporte financiero completo.</div>
+    <div class="caja"><h3>Resumen operativo (sin montos)</h3><div class="fila"><div class="kpi">Procesados<b>2</b></div><div class="kpi">Pendientes<b>1</b></div><div class="kpi">Cancelados<b>1</b></div></div></div>
+  </div>
+</section>
+
+<!-- 11. NOTIFICACIONES -->
+<section class="pantalla" id="notificaciones">
+  <nav class="sb" data-on="notificaciones"></nav>
+  <div class="main">
+    <div class="fila" style="justify-content:space-between"><div><h1>Notificaciones</h1><p class="sub">Alertas automáticas de stock bajo para tu rol</p></div><a class="btn s">Marcar todas como leídas</a></div>
+    <div class="caja">
+      <p style="border-left:4px solid #111827; padding-left:10px"><b>Reponer: Atún en trozos</b> <span class="tag">Compras</span><br>Generar orden de compra de 17 unidades. Stock actual: 13, mínimo: 15.<br><small>18/11/2026 15:12</small> <a class="btn s" style="float:right">Marcar leída</a></p>
+      <p style="border-left:4px solid #111827; padding-left:10px"><b>Stock bajo: Atún en trozos</b> <span class="tag">Gerente</span><br>Tiene 13 unidades y su mínimo es 15. Riesgo de pérdida de ventas.<br><small>18/11/2026 15:12</small></p>
+    </div>
+  </div>
+</section>
+
+<!-- 12. CONFIGURACIÓN -->
+<section class="pantalla" id="configuracion">
+  <nav class="sb" data-on="configuracion"></nav>
+  <div class="main">
+    <h1>Configuración del sistema</h1><p class="sub">Solo Administrador</p>
+    <div class="caja"><h3>Pasarelas de pago</h3><table><tr><th>Pasarela</th><th>Dato requerido</th><th>Estado</th><th></th></tr>
+      <tr><td>PayPal</td><td>correo</td><td><span class="tag v">Habilitada</span></td><td><a class="btn s">Deshabilitar</a></td></tr>
+      <tr><td>Yape</td><td>celular</td><td><span class="tag v">Habilitada</span></td><td><a class="btn s">Deshabilitar</a></td></tr>
+      <tr><td>Plin</td><td>celular</td><td><span class="tag r">Deshabilitada</span></td><td><a class="btn">Habilitar</a></td></tr></table></div>
+    <div class="caja"><h3>Estrategia de precios</h3>
+      <div class="fila"><div class="kpi">◉ Precio estándar<br><small>Precio base de lista</small></div><div class="kpi">○ Descuento porcentual<br><small>% configurable</small></div><div class="kpi">○ Precio dinámico<br><small>Demanda y temporada</small></div></div>
+      <p>Descuento % <span class="inp" style="min-width:60px">10</span> &nbsp; Recargo temporada alta % <span class="inp" style="min-width:60px">15</span></p>
+      <a class="btn">Guardar estrategia</a></div>
+  </div>
+</section>
+
+<script>
+  const menu = [
+    ['inicio', 'Inicio'], ['#Ventas'], ['catalogo', 'Catálogo'], ['pedidos', 'Pedidos'], ['cola', 'Cola de comandos'],
+    ['#Operaciones'], ['inventario', 'Inventario'], ['notificaciones', 'Notificaciones <b style="background:#ef4444;color:#fff;border-radius:9px;padding:0 6px">3</b>'],
+    ['reportes', 'Reportes financieros'], ['#Administración'], ['configuracion', 'Configuración']];
+  document.querySelectorAll('nav.sb').forEach(function (nav) {
+    const activo = nav.getAttribute('data-on');
+    let html = '<div class="logo"><span>TS</span>TechSolutions</div>';
+    menu.forEach(function (m) {
+      html += m[0].startsWith('#') ? '<div class="sec">' + m[0].slice(1) + '</div>'
+        : '<a href="#' + m[0] + '" class="' + (m[0] === activo ? 'on' : '') + '">' + m[1] + '</a>';
+    });
+    html += '<div class="yo">Luis Ramírez<br><span class="tag" style="color:#e5e7eb;border-color:#e5e7eb">Gerente</span><br><a href="#login">Cerrar sesión</a></div>';
+    nav.innerHTML = html;
+  });
+  const indice = document.getElementById('indice');
+  if (location.search.indexOf('captura') >= 0) { indice.style.display = 'none'; document.body.style.background = '#fff'; }
+  document.querySelectorAll('.pantalla').forEach(function (s, i) {
+    indice.innerHTML += '<a href="#' + s.id + '">' + (i + 1) + '. ' + s.id + '</a>';
+  });
+  function mostrar() {
+    const id = (location.hash || '#login').slice(1);
+    document.querySelectorAll('.pantalla').forEach(function (s) { s.classList.toggle('visible', s.id === id); });
+    window.scrollTo(0, 0);
+  }
+  window.addEventListener('hashchange', mostrar);
+  mostrar();
+</script>
+</body>
+</html>
