@@ -1,4 +1,4 @@
-# TechSolutions · Plataforma de Gestión Empresarial
+﻿# TechSolutions · Plataforma de Gestión Empresarial
 
 Aplicación web para pymes peruanas que integra **ventas, inventario, pagos y reportes financieros**, construida con **Java 17 + Spring Boot 3 + Thymeleaf + Spring Data JPA** y diseñada aplicando patrones de diseño estructurales, de comportamiento y GRASP.
 
@@ -29,7 +29,7 @@ Aplicación web para pymes peruanas que integra **ventas, inventario, pagos y re
 ## 2. Instalación
 
 ```bash
-git clone https://github.com/<usuario>/techsolutions-plataforma.git
+git clone https://github.com/andersonugazpor-crypto/techsolutions-plataforma.git
 cd techsolutions-plataforma
 mvn clean install        # descarga dependencias, compila y ejecuta las pruebas
 ```
